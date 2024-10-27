@@ -1,5 +1,6 @@
 import React from 'react';
 import { useStore } from '../store';
+import MaterialSelector from './MaterialSelector';
 
 const BeamConfig = () => {
   const { beam, updateBeam } = useStore();
@@ -66,6 +67,8 @@ const BeamConfig = () => {
             </div>
           </div>
         )}
+
+        <MaterialSelector />
       </div>
     </div>
   );

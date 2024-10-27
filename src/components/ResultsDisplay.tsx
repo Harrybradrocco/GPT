@@ -66,6 +66,30 @@ const ResultsDisplay = () => {
           </div>
         </div>
 
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-gray-300">Max Normal Stress</p>
+            <p className="text-2xl font-bold">{results.maxNormalStress.toFixed(2)} MPa</p>
+          </div>
+          <div>
+            <p className="text-gray-300">Max Shear Stress</p>
+            <p className="text-2xl font-bold">{results.maxShearStress.toFixed(2)} MPa</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-gray-300">Max Deflection</p>
+            <p className="text-2xl font-bold">{(results.deflection * 1000).toFixed(2)} mm</p>
+          </div>
+          <div>
+            <p className="text-gray-300">Safety Factor</p>
+            <p className={`text-2xl font-bold ${results.safetyFactor < 1.5 ? 'text-red-500' : 'text-green-500'}`}>
+              {results.safetyFactor.toFixed(2)}
+            </p>
+          </div>
+        </div>
+
         <div>
           <p className="text-gray-300">Center of Gravity</p>
           <p className="text-2xl font-bold">{results.centerOfGravity.toFixed(2)} m</p>

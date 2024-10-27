@@ -1,5 +1,7 @@
 import { create } from 'zustand';
-import { Load, Results, Beam, BeamDiagramPoint } from './types';
+import { Load, Results, Beam, BeamDiagramPoint, Material } from './types';
+import { materials } from './data/materials';
+import { calculateSectionProperties } from './utils/sectionProperties';
 
 interface State {
   loads: Load[];
@@ -18,7 +20,15 @@ export const useStore = create<State>((set, get) => ({
   beam: {
     length: 10,
     type: 'simple',
-    supports: { left: 0, right: 10 }
+    supports: { left: 0, right: 10 },
+    material: materials[0],
+    crossSection: {
+      type: 'rectangular',
+      dimensions: {
+        width: 100,
+        height: 200
+      }
+    }
   },
   results: {
     resultantForce: 0,
@@ -27,7 +37,13 @@ export const useStore = create<State>((set, get) => ({
     reactionForceB: 0,
     centerOfGravity: 0,
     maxShearForce: 0,
-    maxBendingMoment: 0
+    maxBendingMoment: 0,
+    maxNormalStress: 0,
+    maxShearStress: 0,
+    deflection: 0,
+    safetyFactor: 0,
+    area: 0,
+    momentOfInertia: 0
   },
   diagramPoints: [],
   
@@ -66,6 +82,9 @@ export const useStore = create<State>((set, get) => ({
   calculateResults: () => {
     const { loads, beam } = get();
     
+    // Calculate section properties
+    const { area, momentOfInertia } = calculateSectionProperties(beam.crossSection);
+    
     // Calculate total vertical forces and moments
     let totalVerticalForce = 0;
     let totalMoment = 0;
@@ -76,7 +95,6 @@ export const useStore = create<State>((set, get) => ({
         totalVerticalForce += verticalForce;
         totalMoment += verticalForce * load.distance;
       } else {
-        // Distributed load
         const totalForce = load.force * (load.length || 0);
         totalVerticalForce += totalForce;
         const centroid = load.distance + (load.length || 0) / 2;
@@ -89,7 +107,6 @@ export const useStore = create<State>((set, get) => ({
     let reactionB = 0;
 
     if (beam.type === 'simple') {
-      // For simple beam: sum of moments about A = 0
       const spanLength = beam.supports.right - beam.supports.left;
       reactionB = totalMoment / spanLength;
       reactionA = totalVerticalForce - reactionB;
@@ -110,6 +127,7 @@ export const useStore = create<State>((set, get) => ({
       const x = i * dx;
       let shearForce = -reactionA;
       let bendingMoment = -reactionA * (x - beam.supports.left);
+      let deflection = 0;
 
       // Add effects of loads
       loads.forEach(load => {
@@ -136,13 +154,18 @@ export const useStore = create<State>((set, get) => ({
       maxShearForce = Math.max(maxShearForce, Math.abs(shearForce));
       maxBendingMoment = Math.max(maxBendingMoment, Math.abs(bendingMoment));
 
-      points.push({
-        distance: x,
-        shearForce,
-        bendingMoment,
-        deflection: 0 // Placeholder for future deflection calculation
-      });
+      // Calculate deflection using elastic beam theory
+      if (beam.type === 'simple' && momentOfInertia > 0) {
+        deflection = (bendingMoment * Math.pow(x, 2)) / (2 * beam.material.elasticModulus * 1e9 * momentOfInertia);
+      }
+
+      points.push({ distance: x, shearForce, bendingMoment, deflection });
     }
+
+    // Calculate stresses
+    const maxNormalStress = momentOfInertia > 0 ? (maxBendingMoment * 1000) / (momentOfInertia / (beam.crossSection.dimensions.height || 0) * 2) : 0;
+    const maxShearStress = area > 0 ? (1.5 * maxShearForce) / area : 0;
+    const safetyFactor = maxNormalStress > 0 ? beam.material.yieldStrength / maxNormalStress : 0;
 
     // Calculate center of gravity
     const centerOfGravity = totalVerticalForce !== 0 ? totalMoment / totalVerticalForce : 0;
@@ -150,12 +173,18 @@ export const useStore = create<State>((set, get) => ({
     set({
       results: {
         resultantForce: totalVerticalForce,
-        resultantAngle: 90, // Assuming vertical loads
+        resultantAngle: 90,
         reactionForceA: reactionA,
         reactionForceB: reactionB,
         centerOfGravity,
         maxShearForce,
-        maxBendingMoment
+        maxBendingMoment,
+        maxNormalStress,
+        maxShearStress,
+        deflection: Math.max(...points.map(p => Math.abs(p.deflection))),
+        safetyFactor,
+        area,
+        momentOfInertia
       },
       diagramPoints: points
     });
