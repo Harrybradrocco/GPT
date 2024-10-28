@@ -23,11 +23,8 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
 
   // Calculate domain for Y axis
   const values = data.map(d => isShear ? d.shearForce : d.bendingMoment).filter(Boolean) as number[];
-  const maxAbs = Math.max(...values.map(Math.abs), 0.1); // Avoid zero domain
+  const maxAbs = Math.max(...values.map(Math.abs), 0.1);
   const yDomain = [-maxAbs, maxAbs];
-
-  // Get the maximum X value from the data
-  const maxX = Math.max(...data.map(d => d.distance));
 
   return (
     <div style={{ height: `${height}px` }}>
@@ -37,7 +34,6 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="distance"
-            domain={[0, maxX]}
             label={{ value: 'Distance (m)', position: 'bottom' }}
             tick={{ fontSize: 12 }}
             tickFormatter={(value) => value.toFixed(1)}

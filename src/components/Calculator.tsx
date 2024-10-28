@@ -28,7 +28,7 @@ const Calculator = () => {
           </div>
           
           <button
-            onClick={() => addLoad()}
+            onClick={addLoad}
             className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
           >
             Add Load

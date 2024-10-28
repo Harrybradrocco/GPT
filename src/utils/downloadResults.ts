@@ -10,44 +10,79 @@ interface DownloadData {
 }
 
 const generateTextContent = (data: DownloadData) => {
-  const { results, loads, beam, diagramPoints } = data;
+  const { results, loads, beam } = data;
   
-  return `
-Enhanced Load Calculator Results
-==============================
+  const formatNumber = (num: number) => num.toFixed(2).padStart(10);
+  const formatLabel = (label: string) => label.padEnd(25);
+  
+  return [
+    'Enhanced Load Calculator Results',
+    '================================',
+    '',
+    'Beam Configuration',
+    '----------------',
+    `${formatLabel('Type:')}${beam.type}`,
+    `${formatLabel('Length:')}${beam.length}m`,
+    `${formatLabel('Material:')}${beam.material.name}`,
+    '',
+    'Applied Loads',
+    '-------------',
+    ...loads.map((load, i) => [
+      `Load ${i + 1}:`,
+      `${formatLabel('  Type:')}${load.type}`,
+      `${formatLabel('  Force:')}${load.force}${load.type === 'point' ? 'N' : 'N/m'}`,
+      `${formatLabel('  Distance from left:')}${load.distance}m`,
+      load.type === 'point' 
+        ? `${formatLabel('  Angle:')}${load.angle}°`
+        : `${formatLabel('  Length:')}${load.length}m`,
+      ''
+    ]).flat(),
+    'Analysis Results',
+    '----------------',
+    `${formatLabel('Resultant Force:')}${formatNumber(results.resultantForce)} N`,
+    `${formatLabel('Resultant Angle:')}${formatNumber(results.resultantAngle)}°`,
+    `${formatLabel('Reaction Force A:')}${formatNumber(results.reactionForceA)} N`,
+    `${formatLabel('Reaction Force B:')}${formatNumber(results.reactionForceB)} N`,
+    `${formatLabel('Max Shear Force:')}${formatNumber(results.maxShearForce)} N`,
+    `${formatLabel('Max Bending Moment:')}${formatNumber(results.maxBendingMoment)} Nm`,
+    `${formatLabel('Max Normal Stress:')}${formatNumber(results.maxNormalStress)} MPa`,
+    `${formatLabel('Max Shear Stress:')}${formatNumber(results.maxShearStress)} MPa`,
+    `${formatLabel('Max Deflection:')}${formatNumber(results.deflection * 1000)} mm`,
+    `${formatLabel('Safety Factor:')}${formatNumber(results.safetyFactor)}`,
+    `${formatLabel('Center of Gravity:')}${formatNumber(results.centerOfGravity)} m`,
+    '',
+    'Section Properties',
+    '-----------------',
+    `${formatLabel('Cross-sectional Area:')}${formatNumber(results.area)} mm²`,
+    `${formatLabel('Moment of Inertia:')}${formatNumber(results.momentOfInertia)} mm⁴`,
+    ''
+  ].join('\n');
+};
 
-Beam Configuration
------------------
-Type: ${beam.type}
-Length: ${beam.length}m
+const captureCharts = async () => {
+  const charts = document.querySelectorAll('.recharts-wrapper');
+  const captures = [];
 
-Applied Loads
-------------
-${loads.map((load, i) => `
-Load ${i + 1}:
-  Type: ${load.type}
-  Force: ${load.force}${load.type === 'point' ? 'N' : 'N/m'}
-  Distance from left: ${load.distance}m
-  ${load.type === 'point' ? `Angle: ${load.angle}°` : `Length: ${load.length}m`}
-`).join('\n')}
+  for (const chart of Array.from(charts)) {
+    const canvas = await html2canvas(chart as HTMLElement, {
+      backgroundColor: null,
+      removeContainer: true,
+      scale: 2,
+      logging: false,
+      onclone: (doc, elem) => {
+        // Remove backgrounds from chart elements
+        elem.querySelectorAll('.recharts-cartesian-grid').forEach(grid => {
+          (grid as HTMLElement).style.opacity = '0.3';
+        });
+        elem.querySelectorAll('.recharts-surface').forEach(surface => {
+          (surface as HTMLElement).style.background = 'none';
+        });
+      }
+    });
+    captures.push(canvas.toDataURL('image/png'));
+  }
 
-Results
--------
-Resultant Force: ${results.resultantForce.toFixed(2)} N
-Resultant Angle: ${results.resultantAngle.toFixed(2)}°
-Reaction Force A: ${results.reactionForceA.toFixed(2)} N
-Reaction Force B: ${results.reactionForceB.toFixed(2)} N
-Max Shear Force: ${results.maxShearForce.toFixed(2)} N
-Max Bending Moment: ${results.maxBendingMoment.toFixed(2)} Nm
-Center of Gravity: ${results.centerOfGravity.toFixed(2)} m
-
-Diagram Points
--------------
-Distance (m) | Shear Force (N) | Bending Moment (Nm)
-${diagramPoints.map(p => 
-  `${p.distance.toFixed(2).padStart(10)} | ${p.shearForce.toFixed(2).padStart(13)} | ${p.bendingMoment.toFixed(2).padStart(16)}`
-).join('\n')}
-`;
+  return captures;
 };
 
 export const downloadResults = async (data: DownloadData, format: 'txt' | 'pdf' = 'txt') => {
@@ -63,47 +98,76 @@ export const downloadResults = async (data: DownloadData, format: 'txt' | 'pdf' 
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   } else {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const content = generateTextContent(data);
-    
-    // Add text content
-    const lines = content.split('\n');
-    let y = 10;
-    lines.forEach(line => {
-      if (line.startsWith('===')) {
-        y += 2;
-      } else if (line.startsWith('---')) {
-        y += 2;
-      } else {
-        pdf.setFontSize(10);
-        pdf.text(line, 10, y);
-        y += 5;
-      }
-    });
-    
-    // Add diagrams
     try {
-      const diagrams = document.querySelectorAll('.bg-gray-700\\/50');
-      let currentY = y + 10;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      });
+
+      // Set font to courier for monospace formatting
+      pdf.setFont('courier');
+      pdf.setFontSize(10);
+
+      // Add text content
+      const content = generateTextContent(data).split('\n');
+      let y = 10;
       
-      for (const diagram of Array.from(diagrams)) {
-        const canvas = await html2canvas(diagram as HTMLElement);
-        const imgData = canvas.toDataURL('image/png');
-        
-        // Calculate scaled dimensions to fit PDF width
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        // Add new page if diagram won't fit
-        if (currentY + pdfHeight > pdf.internal.pageSize.getHeight()) {
-          pdf.addPage();
-          currentY = 10;
+      content.forEach(line => {
+        if (line.startsWith('===')) {
+          pdf.setFont('courier', 'bold');
+          y += 2;
+        } else if (line.startsWith('---')) {
+          y += 2;
+        } else {
+          pdf.setFont('courier', 'normal');
+          if (line.trim()) {
+            pdf.text(line, 10, y);
+          }
+          y += 5;
         }
-        
-        pdf.addImage(imgData, 'PNG', 10, currentY, pdfWidth - 20, pdfHeight - 20);
-        currentY += pdfHeight;
-      }
+      });
+
+      // Add diagrams
+      const chartImages = await captureCharts();
       
+      if (chartImages.length > 0) {
+        // Add a new page for charts
+        pdf.addPage();
+        
+        let currentY = 20;
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const maxWidth = pageWidth - 20; // 10mm margin on each side
+        
+        chartImages.forEach((imgData, index) => {
+          if (currentY > pdf.internal.pageSize.getHeight() - 40) {
+            pdf.addPage();
+            currentY = 20;
+          }
+
+          // Add chart title
+          pdf.setFont('courier', 'bold');
+          pdf.text(
+            index === 0 ? 'Shear Force Diagram' : 'Bending Moment Diagram',
+            10,
+            currentY - 5
+          );
+
+          // Add chart image
+          pdf.addImage(
+            imgData,
+            'PNG',
+            10,
+            currentY,
+            maxWidth,
+            maxWidth * 0.4
+          );
+          
+          currentY += (maxWidth * 0.4) + 20;
+        });
+      }
+
       pdf.save('beam-calculator-results.pdf');
     } catch (error) {
       console.error('Error generating PDF:', error);
