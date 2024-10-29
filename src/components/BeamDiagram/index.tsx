@@ -7,13 +7,8 @@ import { ForceChart } from './ForceChart';
 const BeamDiagram: React.FC = () => {
   const { beam, loads, diagramPoints } = useStore();
   
-  // Calculate the container width and height
-  const containerWidth = '100%';
-  const containerHeight = 180; // Increased height for better visibility
-  const paddingX = 60; // Increased padding for better support visibility
-  
-  // Calculate scale factor based on container size minus padding
-  const scale = (100 - (2 * (paddingX / 5))) / beam.length; // Adjusted scale calculation
+  // Calculate scale factor
+  const scale = 100 / beam.length;
 
   const shearForceData = diagramPoints.map((point, index) => ({
     ...point,
@@ -33,79 +28,77 @@ const BeamDiagram: React.FC = () => {
   }));
 
   return (
-    <div className="bg-gray-700/50 p-6 rounded-lg space-y-6">
-      <h3 className="text-xl font-semibold">Beam Diagram</h3>
-      
-      <div className="relative bg-gray-800 rounded-lg p-8 mb-6" style={{ height: containerHeight, width: containerWidth }}>
-        {/* Main beam */}
-        <div 
-          className="absolute h-3 bg-gray-600 rounded"
-          style={{
-            top: '50%',
-            left: `${paddingX}px`,
-            right: `${paddingX}px`,
-            transform: 'translateY(-50%)'
-          }}
-        />
-        
-        {/* Length markers */}
-        <div 
-          className="absolute bottom-6"
-          style={{
-            left: `${paddingX}px`,
-            right: `${paddingX}px`,
-            height: '24px'
-          }}
-        >
-          {markers.map((marker, i) => (
-            <div 
-              key={i} 
-              className="absolute flex flex-col items-center"
-              style={{ 
-                left: `${marker.position * scale}%`,
-                transform: 'translateX(-50%)'
-              }}
-            >
-              <div className="h-4 w-0.5 bg-gray-500" />
-              <span className="text-sm text-gray-300 mt-1">{marker.label}m</span>
-            </div>
-          ))}
-        </div>
-        
-        <BeamSupports 
-          type={beam.type}
-          leftSupport={beam.supports.left}
-          rightSupport={beam.supports.right}
-          scale={scale}
-          paddingX={paddingX}
-        />
-        
-        <div 
-          className="absolute"
-          style={{
-            left: `${paddingX}px`,
-            right: `${paddingX}px`,
-            top: '20%',
-            bottom: '40%'
-          }}
-        >
-          {loads.map((load) => (
-            <LoadMarker
-              key={load.id}
-              type={load.type}
-              force={load.force}
-              distance={load.distance}
-              length={load.length}
-              scale={scale}
-              beamLength={beam.length}
-            />
-          ))}
+    <div className="space-y-8">
+      {/* Beam Visualization */}
+      <div className="bg-gray-700/50 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold mb-6">Beam Diagram</h3>
+        <div className="relative bg-gray-800 rounded-lg p-8 h-[200px]">
+          {/* Main beam */}
+          <div className="absolute top-1/2 left-[60px] right-[60px] h-3 bg-gray-600 rounded transform -translate-y-1/2" />
+          
+          {/* Length markers */}
+          <div className="absolute bottom-4 left-[60px] right-[60px] h-[30px]">
+            {markers.map((marker, i) => (
+              <div 
+                key={i} 
+                className="absolute flex flex-col items-center"
+                style={{ 
+                  left: `${marker.position * scale}%`,
+                  transform: 'translateX(-50%)'
+                }}
+              >
+                <div className="h-4 w-0.5 bg-gray-500" />
+                <span className="text-sm text-gray-300 mt-2">{marker.label}m</span>
+              </div>
+            ))}
+          </div>
+          
+          <BeamSupports 
+            type={beam.type}
+            leftSupport={beam.supports.left}
+            rightSupport={beam.supports.right}
+            scale={scale}
+            paddingX={60}
+          />
+          
+          <div className="absolute left-[60px] right-[60px] top-[20%] bottom-[40%]">
+            {loads.map((load) => (
+              <LoadMarker
+                key={load.id}
+                type={load.type}
+                force={load.force}
+                distance={load.distance}
+                length={load.length}
+                scale={scale}
+                beamLength={beam.length}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="space-y-6">
-        <ForceChart data={shearForceData} type="shear" />
-        <ForceChart data={bendingMomentData} type="moment" />
+      {/* Shear Force Diagram */}
+      <div className="bg-gray-700/50 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold mb-6">Shear Force Diagram</h3>
+        <div className="bg-gray-800 rounded-lg p-8">
+          <ForceChart 
+            data={shearForceData} 
+            type="shear" 
+            height={300}
+          />
+        </div>
+      </div>
+
+      {/* Bending Moment Diagram */}
+      <div className="bg-gray-700/50 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold mb-6">Bending Moment Diagram</h3>
+        <div className="bg-gray-800 rounded-lg p-8">
+          <ForceChart 
+            data={bendingMomentData} 
+            type="moment" 
+            height={300}
+          />
+        </div>
       </div>
     </div>
   );

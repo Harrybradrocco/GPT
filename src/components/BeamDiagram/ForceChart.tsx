@@ -18,7 +18,6 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
   const isShear = type === 'shear';
   const dataKey = isShear ? 'shearForce' : 'bendingMoment';
   const color = isShear ? '#ef4444' : '#3b82f6';
-  const title = isShear ? 'Shear Force Diagram' : 'Bending Moment Diagram';
   const unit = isShear ? 'N' : 'Nm';
 
   // Calculate domain for Y axis
@@ -27,36 +26,75 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
   const yDomain = [-maxAbs, maxAbs];
 
   return (
-    <div style={{ height: `${height}px` }}>
-      <h4 className="text-lg font-medium mb-2">{title}</h4>
+    <div style={{ height }}>
       <ResponsiveContainer>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
+        <LineChart
+          data={data}
+          margin={{
+            top: 20,
+            right: 30,
+            left: 80,
+            bottom: 60
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
           <XAxis
             dataKey="distance"
-            label={{ value: 'Distance (m)', position: 'bottom' }}
-            tick={{ fontSize: 12 }}
+            height={50}
+            label={{
+              value: 'Distance (m)',
+              position: 'bottom',
+              offset: 40,
+              style: {
+                fill: '#e5e7eb',
+                fontSize: '14px',
+                fontWeight: 500
+              }
+            }}
+            tick={{
+              fontSize: 12,
+              fill: '#e5e7eb'
+            }}
             tickFormatter={(value) => value.toFixed(1)}
           />
           <YAxis
             domain={yDomain}
+            width={70}
             label={{
-              value: `${isShear ? 'Shear Force (N)' : 'Bending Moment (Nm)'}`,
+              value: isShear ? 'Shear Force (N)' : 'Bending Moment (Nm)',
               angle: -90,
               position: 'insideLeft',
-              style: { textAnchor: 'middle' }
+              offset: -60,
+              style: {
+                fill: '#e5e7eb',
+                fontSize: '14px',
+                fontWeight: 500,
+                textAnchor: 'middle'
+              }
             }}
-            tick={{ fontSize: 12 }}
+            tick={{
+              fontSize: 12,
+              fill: '#e5e7eb'
+            }}
             tickFormatter={(value) => value.toFixed(1)}
           />
           <Tooltip
             formatter={(value: number) => [`${value.toFixed(2)} ${unit}`, isShear ? 'Shear Force' : 'Bending Moment']}
             labelFormatter={(label: number) => `Distance: ${label.toFixed(2)} m`}
+            contentStyle={{
+              backgroundColor: '#1f2937',
+              border: '1px solid #374151',
+              borderRadius: '0.375rem',
+              padding: '8px 12px'
+            }}
+            itemStyle={{ color: '#e5e7eb' }}
+            labelStyle={{ color: '#e5e7eb', marginBottom: '4px' }}
           />
           <Line
             type="monotone"
             dataKey={dataKey}
             stroke={color}
+            strokeWidth={2}
             dot={false}
             name={isShear ? 'Shear Force' : 'Bending Moment'}
             key={`${type}-line-${dataKey}`}
