@@ -41,7 +41,7 @@ const LoadInput: React.FC<LoadInputProps> = ({ load, onUpdate, onRemove, maxDist
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Distance from Left (m)</label>
+            <label className="block text-sm text-gray-300 mb-1">Distance from Left (mm)</label>
             <input
               type="number"
               value={load.distance}
@@ -49,12 +49,12 @@ const LoadInput: React.FC<LoadInputProps> = ({ load, onUpdate, onRemove, maxDist
               className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
               min="0"
               max={maxDistance}
-              step="0.1"
+              step="1"
             />
           </div>
           {load.type === 'distributed' ? (
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Length (m)</label>
+              <label className="block text-sm text-gray-300 mb-1">Length (mm)</label>
               <input
                 type="number"
                 value={load.length || 0}
@@ -62,7 +62,7 @@ const LoadInput: React.FC<LoadInputProps> = ({ load, onUpdate, onRemove, maxDist
                 className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
                 min="0"
                 max={maxDistance - load.distance}
-                step="0.1"
+                step="1"
               />
             </div>
           ) : (

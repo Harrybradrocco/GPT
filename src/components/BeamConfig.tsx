@@ -22,21 +22,21 @@ const BeamConfig = () => {
         </div>
         
         <div>
-          <label className="block text-sm text-gray-300 mb-1">Beam Length (m)</label>
+          <label className="block text-sm text-gray-300 mb-1">Beam Length (mm)</label>
           <input
             type="number"
             value={beam.length}
             onChange={(e) => updateBeam({ ...beam, length: parseFloat(e.target.value) || 0 })}
             className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
             min="0"
-            step="0.1"
+            step="1"
           />
         </div>
 
         {beam.type === 'simple' && (
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Left Support Position (m)</label>
+              <label className="block text-sm text-gray-300 mb-1">Left Support Position (mm)</label>
               <input
                 type="number"
                 value={beam.supports.left}
@@ -47,11 +47,11 @@ const BeamConfig = () => {
                 className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
                 min="0"
                 max={beam.length}
-                step="0.1"
+                step="1"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Right Support Position (m)</label>
+              <label className="block text-sm text-gray-300 mb-1">Right Support Position (mm)</label>
               <input
                 type="number"
                 value={beam.supports.right}
@@ -62,7 +62,7 @@ const BeamConfig = () => {
                 className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
                 min="0"
                 max={beam.length}
-                step="0.1"
+                step="1"
               />
             </div>
           </div>
