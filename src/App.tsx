@@ -5,14 +5,14 @@ import Header from './components/Header';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+    <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 gap-8">
-          <section className="bg-gray-800/50 rounded-xl p-6 shadow-xl backdrop-blur-sm">
+        <div className="space-y-12">
+          <section className="bg-white rounded-xl p-8 shadow-lg">
             <div className="flex items-center gap-3 mb-6">
-              <Scale className="w-6 h-6 text-blue-400" />
-              <h2 className="text-2xl font-bold">Load Calculator</h2>
+              <Scale className="w-6 h-6 text-blue-600" />
+              <h2 className="text-2xl font-bold text-gray-900">Load Calculator</h2>
             </div>
             <LoadCalculator />
           </section>

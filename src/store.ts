@@ -88,31 +88,40 @@ export const useStore = create<State>((set, get) => ({
     // Convert beam length from mm to m for calculations
     const beamLengthM = beam.length / 1000;
     
-    // Calculate total vertical forces and moments for reaction forces
+    // Calculate total vertical and horizontal forces
     let totalVerticalForce = 0;
+    let totalHorizontalForce = 0;
     let totalMoment = 0;
 
     loads.forEach(load => {
       if (load.type === 'point') {
         const angleRad = (load.angle * Math.PI) / 180;
         const verticalForce = load.force * Math.cos(angleRad);
+        const horizontalForce = load.force * Math.sin(angleRad);
         totalVerticalForce += verticalForce;
+        totalHorizontalForce += horizontalForce;
         totalMoment += verticalForce * (load.distance / 1000);
       } else if (load.type === 'distributed') {
         const lengthM = (load.length || 0) / 1000;
-        const totalForce = load.force * lengthM * 1000; // Convert N/m to N
+        const totalForce = load.force * lengthM;
         totalVerticalForce += totalForce;
         const centerPoint = (load.distance + (load.length || 0) / 2) / 1000;
         totalMoment += totalForce * centerPoint;
       }
     });
 
+    // Calculate resultant force and angle
+    const resultantForce = Math.sqrt(
+      Math.pow(totalVerticalForce, 2) + Math.pow(totalHorizontalForce, 2)
+    );
+    const resultantAngle = Math.atan2(totalHorizontalForce, totalVerticalForce) * (180 / Math.PI);
+
     // Calculate reaction forces
     let reactionA = 0;
     let reactionB = 0;
 
     if (beam.type === 'simple') {
-      const spanM = Math.max((beam.supports.right - beam.supports.left) / 1000, 0.001); // Prevent division by zero
+      const spanM = Math.max((beam.supports.right - beam.supports.left) / 1000, 0.001);
       reactionB = totalMoment / spanM;
       reactionA = totalVerticalForce - reactionB;
     } else if (beam.type === 'cantilever') {
@@ -147,15 +156,14 @@ export const useStore = create<State>((set, get) => ({
         } else if (load.type === 'distributed' && x > loadDistanceM) {
           const lengthM = (load.length || 0) / 1000;
           const endPointM = loadDistanceM + lengthM;
-          const forcePerMeter = load.force * 1000; // Convert N/m to N/mm
           
           if (x <= endPointM) {
             const partialLength = x - loadDistanceM;
-            const partialForce = forcePerMeter * partialLength;
+            const partialForce = load.force * partialLength;
             shearForce += partialForce;
             bendingMoment += partialForce * (partialLength / 2);
           } else {
-            const totalForce = forcePerMeter * lengthM;
+            const totalForce = load.force * lengthM;
             shearForce += totalForce;
             bendingMoment += totalForce * (x - (loadDistanceM + lengthM/2));
           }
@@ -167,14 +175,16 @@ export const useStore = create<State>((set, get) => ({
         bendingMoment += reactionB * (x - beam.supports.right / 1000);
       }
 
-      // Calculate deflection
+      // Calculate deflection using elastic beam theory
       if (momentOfInertia > 0) {
         const E = beam.material.elasticModulus * 1e9; // Convert GPa to Pa
         const I = momentOfInertia * 1e-12; // Convert mm⁴ to m⁴
         
         if (beam.type === 'simple') {
+          // For simple beam: y = -Mx²/2EI
           deflection = Math.abs(bendingMoment) * Math.pow(x, 2) / (2 * E * I);
         } else if (beam.type === 'cantilever') {
+          // For cantilever: y = -Mx²/2EI
           deflection = Math.abs(bendingMoment) * Math.pow(x, 2) / (2 * E * I);
         }
       }
@@ -184,7 +194,7 @@ export const useStore = create<State>((set, get) => ({
       maxDeflection = Math.max(maxDeflection, Math.abs(deflection));
 
       points.push({ 
-        distance: x * 1000,
+        distance: x * 1000, // Convert back to mm
         shearForce, 
         bendingMoment, 
         deflection 
@@ -192,9 +202,9 @@ export const useStore = create<State>((set, get) => ({
     }
 
     // Calculate stresses
-    const height = beam.crossSection.dimensions.height || 1; // Prevent division by zero
+    const height = beam.crossSection.dimensions.height || 1;
     const maxNormalStress = momentOfInertia > 0 
-      ? (maxBendingMoment * 1000 * (height / 2)) / momentOfInertia 
+      ? (maxBendingMoment * (height / 2)) / momentOfInertia 
       : 0;
 
     const maxShearStress = area > 0 
@@ -203,22 +213,20 @@ export const useStore = create<State>((set, get) => ({
 
     // Calculate safety factor using von Mises criterion
     const vonMisesStress = Math.sqrt(Math.pow(maxNormalStress, 2) + 3 * Math.pow(maxShearStress, 2));
-    
-    // Ensure we have a valid yield strength and stress value
-    const yieldStrength = beam.material.yieldStrength || 1;
+    const yieldStrength = beam.material.yieldStrength;
     const safetyFactor = vonMisesStress > 0 
       ? yieldStrength / vonMisesStress 
-      : loads.length > 0 ? 999 : 0; // Show 0 if no loads, 999 if loads but no stress
+      : loads.length > 0 ? 999 : 0;
 
     // Calculate center of gravity
     const centerOfGravity = totalVerticalForce !== 0 
-      ? (totalMoment / totalVerticalForce) * 1000 
+      ? totalMoment / totalVerticalForce 
       : 0;
 
     set({
       results: {
-        resultantForce: totalVerticalForce,
-        resultantAngle: 90,
+        resultantForce,
+        resultantAngle,
         reactionForceA: reactionA,
         reactionForceB: reactionB,
         centerOfGravity,

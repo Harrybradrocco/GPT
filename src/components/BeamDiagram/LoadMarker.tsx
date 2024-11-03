@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArrowDown } from 'lucide-react';
 
 interface LoadMarkerProps {
   type: 'point' | 'distributed';
@@ -29,8 +30,10 @@ export const LoadMarker: React.FC<LoadMarkerProps> = ({
           transform: 'translateX(-50%)'
         }}
       >
-        <div className="w-1 h-8 bg-red-500" /> {/* Increased size */}
-        <div className="text-sm mt-1 whitespace-nowrap font-medium text-gray-200">{force}N</div>
+        <ArrowDown className="w-8 h-8 text-red-500 stroke-[3]" />
+        <div className="text-sm mt-1 whitespace-nowrap font-medium text-gray-600">
+          {force}N
+        </div>
       </div>
     );
   }
@@ -57,12 +60,12 @@ export const LoadMarker: React.FC<LoadMarkerProps> = ({
           <div className="absolute top-0 left-0 right-0 flex justify-between">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex flex-col items-center">
-                <div className="w-1 h-6 bg-red-500" /> {/* Increased size */}
+                <ArrowDown className="w-6 h-6 text-red-500 stroke-[3]" />
               </div>
             ))}
           </div>
-          <div className="h-6 border-t-2 border-red-500" /> {/* Increased height */}
-          <div className="text-sm mt-1 text-center whitespace-nowrap font-medium text-gray-200">
+          <div className="h-8 border-t-2 border-red-500" />
+          <div className="text-sm mt-1 text-center whitespace-nowrap font-medium text-gray-600">
             {force}N/m
           </div>
         </div>

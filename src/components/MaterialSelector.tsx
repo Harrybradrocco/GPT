@@ -53,7 +53,7 @@ const MaterialSelector = () => {
         return (
           <>
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Width (mm)</label>
+              <label className="block text-sm text-gray-600 mb-1">Width (mm)</label>
               <input
                 type="number"
                 value={beam.crossSection.dimensions.width || 0}
@@ -67,13 +67,13 @@ const MaterialSelector = () => {
                     }
                   }
                 })}
-                className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+                className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="1"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Height (mm)</label>
+              <label className="block text-sm text-gray-600 mb-1">Height (mm)</label>
               <input
                 type="number"
                 value={beam.crossSection.dimensions.height || 0}
@@ -87,7 +87,7 @@ const MaterialSelector = () => {
                     }
                   }
                 })}
-                className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+                className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="1"
               />
@@ -98,7 +98,7 @@ const MaterialSelector = () => {
       case 'circular':
         return (
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Diameter (mm)</label>
+            <label className="block text-sm text-gray-600 mb-1">Diameter (mm)</label>
             <input
               type="number"
               value={beam.crossSection.dimensions.diameter || 0}
@@ -112,7 +112,7 @@ const MaterialSelector = () => {
                   }
                 }
               })}
-              className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+              className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               min="0"
               step="1"
             />
@@ -125,7 +125,7 @@ const MaterialSelector = () => {
         return (
           <>
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Height (mm)</label>
+              <label className="block text-sm text-gray-600 mb-1">Height (mm)</label>
               <input
                 type="number"
                 value={beam.crossSection.dimensions.height || 0}
@@ -139,13 +139,13 @@ const MaterialSelector = () => {
                     }
                   }
                 })}
-                className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+                className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="1"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Flange Width (mm)</label>
+              <label className="block text-sm text-gray-600 mb-1">Flange Width (mm)</label>
               <input
                 type="number"
                 value={beam.crossSection.dimensions.flangeWidth || 0}
@@ -159,13 +159,13 @@ const MaterialSelector = () => {
                     }
                   }
                 })}
-                className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+                className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="1"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Flange Thickness (mm)</label>
+              <label className="block text-sm text-gray-600 mb-1">Flange Thickness (mm)</label>
               <input
                 type="number"
                 value={beam.crossSection.dimensions.flangeThick || 0}
@@ -179,13 +179,13 @@ const MaterialSelector = () => {
                     }
                   }
                 })}
-                className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+                className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="1"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Web Thickness (mm)</label>
+              <label className="block text-sm text-gray-600 mb-1">Web Thickness (mm)</label>
               <input
                 type="number"
                 value={beam.crossSection.dimensions.webThick || 0}
@@ -199,7 +199,7 @@ const MaterialSelector = () => {
                     }
                   }
                 })}
-                className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+                className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="1"
               />
@@ -215,11 +215,11 @@ const MaterialSelector = () => {
   return (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm text-gray-300 mb-1">Material</label>
+        <label className="block text-sm text-gray-600 mb-1">Material</label>
         <select
           value={beam.material.isCustom ? 'custom' : beam.material.id}
           onChange={(e) => handleMaterialChange(e.target.value)}
-          className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
           {materials.map(material => (
             <option key={material.id} value={material.id}>
@@ -233,23 +233,23 @@ const MaterialSelector = () => {
       {isCustomMaterial && (
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Yield Strength (MPa)</label>
+            <label className="block text-sm text-gray-600 mb-1">Yield Strength (MPa)</label>
             <input
               type="number"
               value={beam.material.yieldStrength}
               onChange={(e) => updateMaterialProperty('yieldStrength', parseFloat(e.target.value) || 0)}
-              className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+              className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               min="0"
               step="1"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Elastic Modulus (GPa)</label>
+            <label className="block text-sm text-gray-600 mb-1">Elastic Modulus (GPa)</label>
             <input
               type="number"
               value={beam.material.elasticModulus}
               onChange={(e) => updateMaterialProperty('elasticModulus', parseFloat(e.target.value) || 0)}
-              className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+              className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               min="0"
               step="0.1"
             />
@@ -258,7 +258,7 @@ const MaterialSelector = () => {
       )}
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1">Cross Section Shape</label>
+        <label className="block text-sm text-gray-600 mb-1">Cross Section Shape</label>
         <select
           value={beam.crossSection.type}
           onChange={(e) => updateBeam({
@@ -268,7 +268,7 @@ const MaterialSelector = () => {
               dimensions: {}
             }
           })}
-          className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
           {crossSectionTypes.map(type => (
             <option key={type.value} value={type.value}>
@@ -283,13 +283,13 @@ const MaterialSelector = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-800/50 p-3 rounded">
-          <p className="text-sm text-gray-300">Yield Strength</p>
-          <p className="text-lg font-semibold">{beam.material.yieldStrength} MPa</p>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-sm text-gray-600">Yield Strength</p>
+          <p className="text-lg font-semibold text-gray-900">{beam.material.yieldStrength} MPa</p>
         </div>
-        <div className="bg-gray-800/50 p-3 rounded">
-          <p className="text-sm text-gray-300">Elastic Modulus</p>
-          <p className="text-lg font-semibold">{beam.material.elasticModulus} GPa</p>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-sm text-gray-600">Elastic Modulus</p>
+          <p className="text-lg font-semibold text-gray-900">{beam.material.elasticModulus} GPa</p>
         </div>
       </div>
     </div>

@@ -1,15 +1,9 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-interface DataPoint {
-  distance: number;
-  shearForce?: number;
-  bendingMoment?: number;
-  id: string;
-}
+import { BeamDiagramPoint } from '../../types';
 
 interface ForceChartProps {
-  data: DataPoint[];
+  data: BeamDiagramPoint[];
   type: 'shear' | 'moment';
   height?: number;
 }
@@ -17,7 +11,7 @@ interface ForceChartProps {
 export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200 }) => {
   const isShear = type === 'shear';
   const dataKey = isShear ? 'shearForce' : 'bendingMoment';
-  const color = isShear ? '#ef4444' : '#3b82f6';
+  const color = isShear ? '#dc2626' : '#2563eb';
   const unit = isShear ? 'N' : 'Nm';
 
   // Calculate domain for Y axis
@@ -37,7 +31,7 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
             bottom: 60
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis
             dataKey="distance"
             height={50}
@@ -46,16 +40,17 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
               position: 'bottom',
               offset: 40,
               style: {
-                fill: '#e5e7eb',
+                fill: '#374151',
                 fontSize: '14px',
                 fontWeight: 500
               }
             }}
             tick={{
               fontSize: 12,
-              fill: '#e5e7eb'
+              fill: '#374151'
             }}
             tickFormatter={(value) => value.toFixed(1)}
+            stroke="#9ca3af"
           />
           <YAxis
             domain={yDomain}
@@ -66,7 +61,7 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
               position: 'insideLeft',
               offset: -60,
               style: {
-                fill: '#e5e7eb',
+                fill: '#374151',
                 fontSize: '14px',
                 fontWeight: 500,
                 textAnchor: 'middle'
@@ -74,21 +69,22 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
             }}
             tick={{
               fontSize: 12,
-              fill: '#e5e7eb'
+              fill: '#374151'
             }}
             tickFormatter={(value) => value.toFixed(1)}
+            stroke="#9ca3af"
           />
           <Tooltip
             formatter={(value: number) => [`${value.toFixed(2)} ${unit}`, isShear ? 'Shear Force' : 'Bending Moment']}
             labelFormatter={(label: number) => `Distance: ${label.toFixed(2)} m`}
             contentStyle={{
-              backgroundColor: '#1f2937',
-              border: '1px solid #374151',
+              backgroundColor: 'white',
+              border: '1px solid #e5e7eb',
               borderRadius: '0.375rem',
               padding: '8px 12px'
             }}
-            itemStyle={{ color: '#e5e7eb' }}
-            labelStyle={{ color: '#e5e7eb', marginBottom: '4px' }}
+            itemStyle={{ color: '#374151' }}
+            labelStyle={{ color: '#374151', marginBottom: '4px' }}
           />
           <Line
             type="monotone"
