@@ -70,7 +70,6 @@ const captureCharts = async () => {
       scale: 2,
       logging: false,
       onclone: (doc, elem) => {
-        // Remove backgrounds from chart elements
         elem.querySelectorAll('.recharts-cartesian-grid').forEach(grid => {
           (grid as HTMLElement).style.opacity = '0.3';
         });
@@ -106,51 +105,115 @@ export const downloadResults = async (data: DownloadData, format: 'txt' | 'pdf' 
         compress: true
       });
 
-      // Set font to courier for monospace formatting
-      pdf.setFont('courier');
-      pdf.setFontSize(10);
-
-      // Add text content
-      const content = generateTextContent(data).split('\n');
-      let y = 10;
+      // Add title
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(18);
+      pdf.text('Beam Analysis Report', 105, 20, { align: 'center' });
       
-      content.forEach(line => {
-        if (line.startsWith('===')) {
-          pdf.setFont('courier', 'bold');
-          y += 2;
-        } else if (line.startsWith('---')) {
-          y += 2;
-        } else {
-          pdf.setFont('courier', 'normal');
-          if (line.trim()) {
-            pdf.text(line, 10, y);
-          }
-          y += 5;
-        }
+      // Add date
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      pdf.text(new Date().toLocaleDateString(), 105, 30, { align: 'center' });
+
+      let y = 40;
+
+      // Beam Configuration Section
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.text('1. Beam Configuration', 20, y);
+      y += 10;
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(11);
+      pdf.text([
+        `Type: ${data.beam.type}`,
+        `Length: ${data.beam.length} mm`,
+        `Material: ${data.beam.material.name}`
+      ], 25, y);
+      y += 20;
+
+      // Applied Loads Section
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.text('2. Applied Loads', 20, y);
+      y += 10;
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(11);
+      data.loads.forEach((load, index) => {
+        pdf.text([
+          `Load ${index + 1}:`,
+          `  • Type: ${load.type}`,
+          `  • Force: ${load.force}${load.type === 'point' ? 'N' : 'N/m'}`,
+          `  • Distance: ${load.distance}mm`,
+          load.type === 'point' 
+            ? `  • Angle: ${load.angle}°`
+            : `  • Length: ${load.length}mm`
+        ], 25, y);
+        y += 25;
       });
+
+      // Analysis Results Section
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.text('3. Analysis Results', 20, y);
+      y += 10;
+
+      // Create a table for results
+      const resultData = [
+        ['Parameter', 'Value', 'Unit'],
+        ['Resultant Force', data.results.resultantForce.toFixed(2), 'N'],
+        ['Resultant Angle', data.results.resultantAngle.toFixed(2), '°'],
+        ['Max Shear Force', data.results.maxShearForce.toFixed(2), 'N'],
+        ['Max Bending Moment', data.results.maxBendingMoment.toFixed(2), 'Nm'],
+        ['Max Normal Stress', data.results.maxNormalStress.toFixed(2), 'MPa'],
+        ['Max Shear Stress', data.results.maxShearStress.toFixed(2), 'MPa'],
+        ['Max Deflection', (data.results.deflection * 1000).toFixed(2), 'mm'],
+        ['Safety Factor', data.results.safetyFactor.toFixed(2), '-']
+      ];
+
+      // Add table
+      pdf.setFontSize(10);
+      const startY = y;
+      const cellWidth = 50;
+      const cellHeight = 8;
+      
+      resultData.forEach((row, index) => {
+        pdf.setFont('helvetica', index === 0 ? 'bold' : 'normal');
+        row.forEach((cell, colIndex) => {
+          pdf.rect(20 + colIndex * cellWidth, startY + index * cellHeight, cellWidth, cellHeight);
+          pdf.text(cell.toString(), 25 + colIndex * cellWidth, startY + index * cellHeight + 5);
+        });
+      });
+
+      y = startY + resultData.length * cellHeight + 20;
 
       // Add diagrams
       const chartImages = await captureCharts();
       
       if (chartImages.length > 0) {
-        // Add a new page for charts
         pdf.addPage();
         
-        let currentY = 20;
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(14);
+        pdf.text('4. Force Diagrams', 20, 20);
+
+        let currentY = 30;
         const pageWidth = pdf.internal.pageSize.getWidth();
-        const maxWidth = pageWidth - 20; // 10mm margin on each side
+        const maxWidth = pageWidth - 40; // 20mm margin on each side
         
         chartImages.forEach((imgData, index) => {
           if (currentY > pdf.internal.pageSize.getHeight() - 40) {
             pdf.addPage();
-            currentY = 20;
+            currentY = 30;
           }
 
           // Add chart title
-          pdf.setFont('courier', 'bold');
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(12);
           pdf.text(
-            index === 0 ? 'Shear Force Diagram' : 'Bending Moment Diagram',
-            10,
+            index === 0 ? '4.1 Shear Force Diagram' : '4.2 Bending Moment Diagram',
+            20,
             currentY - 5
           );
 
@@ -158,17 +221,17 @@ export const downloadResults = async (data: DownloadData, format: 'txt' | 'pdf' 
           pdf.addImage(
             imgData,
             'PNG',
-            10,
+            20,
             currentY,
             maxWidth,
             maxWidth * 0.4
           );
           
-          currentY += (maxWidth * 0.4) + 20;
+          currentY += (maxWidth * 0.4) + 30;
         });
       }
 
-      pdf.save('beam-calculator-results.pdf');
+      pdf.save('beam-analysis-report.pdf');
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating PDF. Please try downloading as text instead.');
