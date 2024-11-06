@@ -12,10 +12,16 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
   const isShear = type === 'shear';
   const dataKey = isShear ? 'shearForce' : 'bendingMoment';
   const color = isShear ? '#dc2626' : '#2563eb';
-  const unit = isShear ? 'N' : 'Nm';
+  const unit = isShear ? 'N' : 'N·mm';
+
+  // Convert bending moment from Nm to N·mm if needed
+  const chartData = isShear ? data : data.map(point => ({
+    ...point,
+    bendingMoment: point.bendingMoment * 1000 // Convert Nm to N·mm
+  }));
 
   // Calculate domain for Y axis
-  const values = data.map(d => isShear ? d.shearForce : d.bendingMoment).filter(Boolean) as number[];
+  const values = chartData.map(d => isShear ? d.shearForce : d.bendingMoment).filter(Boolean) as number[];
   const maxAbs = Math.max(...values.map(Math.abs), 0.1);
   const yDomain = [-maxAbs, maxAbs];
 
@@ -23,7 +29,7 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
     <div style={{ height }}>
       <ResponsiveContainer>
         <LineChart
-          data={data}
+          data={chartData}
           margin={{
             top: 20,
             right: 30,
@@ -36,7 +42,7 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
             dataKey="distance"
             height={50}
             label={{
-              value: 'Distance (m)',
+              value: 'Distance (mm)',
               position: 'bottom',
               offset: 40,
               style: {
@@ -49,14 +55,14 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
               fontSize: 12,
               fill: '#374151'
             }}
-            tickFormatter={(value) => value.toFixed(1)}
+            tickFormatter={(value) => value.toFixed(0)}
             stroke="#9ca3af"
           />
           <YAxis
             domain={yDomain}
             width={70}
             label={{
-              value: isShear ? 'Shear Force (N)' : 'Bending Moment (Nm)',
+              value: isShear ? 'Shear Force (N)' : 'Bending Moment (N·mm)',
               angle: -90,
               position: 'insideLeft',
               offset: -60,
@@ -71,12 +77,12 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
               fontSize: 12,
               fill: '#374151'
             }}
-            tickFormatter={(value) => value.toFixed(1)}
+            tickFormatter={(value) => value.toFixed(0)}
             stroke="#9ca3af"
           />
           <Tooltip
             formatter={(value: number) => [`${value.toFixed(2)} ${unit}`, isShear ? 'Shear Force' : 'Bending Moment']}
-            labelFormatter={(label: number) => `Distance: ${label.toFixed(2)} m`}
+            labelFormatter={(label: number) => `Distance: ${label.toFixed(0)} mm`}
             contentStyle={{
               backgroundColor: 'white',
               border: '1px solid #e5e7eb',

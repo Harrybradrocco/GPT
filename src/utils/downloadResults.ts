@@ -22,7 +22,7 @@ const generateTextContent = (data: DownloadData) => {
     'Beam Configuration',
     '----------------',
     `${formatLabel('Type:')}${beam.type}`,
-    `${formatLabel('Length:')}${beam.length}m`,
+    `${formatLabel('Length:')}${beam.length} mm`,
     `${formatLabel('Material:')}${beam.material.name}`,
     '',
     'Applied Loads',
@@ -31,10 +31,10 @@ const generateTextContent = (data: DownloadData) => {
       `Load ${i + 1}:`,
       `${formatLabel('  Type:')}${load.type}`,
       `${formatLabel('  Force:')}${load.force}${load.type === 'point' ? 'N' : 'N/m'}`,
-      `${formatLabel('  Distance from left:')}${load.distance}m`,
+      `${formatLabel('  Distance from left:')}${load.distance} mm`,
       load.type === 'point' 
         ? `${formatLabel('  Angle:')}${load.angle}°`
-        : `${formatLabel('  Length:')}${load.length}m`,
+        : `${formatLabel('  Length:')}${load.length} mm`,
       ''
     ]).flat(),
     'Analysis Results',
@@ -44,12 +44,12 @@ const generateTextContent = (data: DownloadData) => {
     `${formatLabel('Reaction Force A:')}${formatNumber(results.reactionForceA)} N`,
     `${formatLabel('Reaction Force B:')}${formatNumber(results.reactionForceB)} N`,
     `${formatLabel('Max Shear Force:')}${formatNumber(results.maxShearForce)} N`,
-    `${formatLabel('Max Bending Moment:')}${formatNumber(results.maxBendingMoment)} Nm`,
+    `${formatLabel('Max Bending Moment:')}${formatNumber(results.maxBendingMoment * 1000)} N·mm`,
     `${formatLabel('Max Normal Stress:')}${formatNumber(results.maxNormalStress)} MPa`,
     `${formatLabel('Max Shear Stress:')}${formatNumber(results.maxShearStress)} MPa`,
     `${formatLabel('Max Deflection:')}${formatNumber(results.deflection * 1000)} mm`,
     `${formatLabel('Safety Factor:')}${formatNumber(results.safetyFactor)}`,
-    `${formatLabel('Center of Gravity:')}${formatNumber(results.centerOfGravity)} m`,
+    `${formatLabel('Center of Gravity:')}${formatNumber(results.centerOfGravity)} mm`,
     '',
     'Section Properties',
     '-----------------',
@@ -102,120 +102,159 @@ export const downloadResults = async (data: DownloadData, format: 'txt' | 'pdf' 
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
-        compress: true
+        compress: true,
+        putOnlyUsedFonts: true
       });
 
+      // Add custom font
+      pdf.addFont('https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrFJA.ttf', 'Poppins', 'normal');
+      pdf.addFont('https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7V1s.ttf', 'Poppins', 'bold');
+
+      // Set default font
+      pdf.setFont('Poppins');
+
       // Add title
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(18);
+      pdf.setFontSize(24);
+      pdf.setFont('Poppins', 'bold');
       pdf.text('Beam Analysis Report', 105, 20, { align: 'center' });
       
-      // Add date
-      pdf.setFont('helvetica', 'normal');
+      // Add date and document info
       pdf.setFontSize(10);
-      pdf.text(new Date().toLocaleDateString(), 105, 30, { align: 'center' });
+      pdf.setFont('Poppins', 'normal');
+      pdf.text(new Date().toLocaleDateString(), 20, 35);
+      pdf.text('Enhanced Load Calculator', 20, 40);
+      
+      // Add horizontal line
+      pdf.setDrawColor(0);
+      pdf.setLineWidth(0.5);
+      pdf.line(20, 45, 190, 45);
 
-      let y = 40;
+      let y = 60;
 
       // Beam Configuration Section
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(14);
+      pdf.setFont('Poppins', 'bold');
+      pdf.setFontSize(16);
       pdf.text('1. Beam Configuration', 20, y);
       y += 10;
 
-      pdf.setFont('helvetica', 'normal');
+      pdf.setFont('Poppins', 'normal');
       pdf.setFontSize(11);
       pdf.text([
         `Type: ${data.beam.type}`,
         `Length: ${data.beam.length} mm`,
         `Material: ${data.beam.material.name}`
       ], 25, y);
-      y += 20;
+      y += 25;
 
       // Applied Loads Section
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(14);
+      pdf.setFont('Poppins', 'bold');
+      pdf.setFontSize(16);
       pdf.text('2. Applied Loads', 20, y);
       y += 10;
 
-      pdf.setFont('helvetica', 'normal');
+      pdf.setFont('Poppins', 'normal');
       pdf.setFontSize(11);
       data.loads.forEach((load, index) => {
         pdf.text([
           `Load ${index + 1}:`,
           `  • Type: ${load.type}`,
           `  • Force: ${load.force}${load.type === 'point' ? 'N' : 'N/m'}`,
-          `  • Distance: ${load.distance}mm`,
+          `  • Distance: ${load.distance} mm`,
           load.type === 'point' 
             ? `  • Angle: ${load.angle}°`
-            : `  • Length: ${load.length}mm`
+            : `  • Length: ${load.length} mm`
         ], 25, y);
         y += 25;
       });
 
       // Analysis Results Section
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(14);
+      pdf.setFont('Poppins', 'bold');
+      pdf.setFontSize(16);
       pdf.text('3. Analysis Results', 20, y);
-      y += 10;
+      y += 15;
 
-      // Create a table for results
+      // Create a table for results with LaTeX-style borders
       const resultData = [
         ['Parameter', 'Value', 'Unit'],
         ['Resultant Force', data.results.resultantForce.toFixed(2), 'N'],
         ['Resultant Angle', data.results.resultantAngle.toFixed(2), '°'],
         ['Max Shear Force', data.results.maxShearForce.toFixed(2), 'N'],
-        ['Max Bending Moment', data.results.maxBendingMoment.toFixed(2), 'Nm'],
+        ['Max Bending Moment', (data.results.maxBendingMoment * 1000).toFixed(2), 'N·mm'],
         ['Max Normal Stress', data.results.maxNormalStress.toFixed(2), 'MPa'],
         ['Max Shear Stress', data.results.maxShearStress.toFixed(2), 'MPa'],
         ['Max Deflection', (data.results.deflection * 1000).toFixed(2), 'mm'],
         ['Safety Factor', data.results.safetyFactor.toFixed(2), '-']
       ];
 
-      // Add table
+      // Add table with LaTeX-style formatting
       pdf.setFontSize(10);
       const startY = y;
-      const cellWidth = 50;
+      const cellWidth = [100, 50, 30]; // Adjusted widths
       const cellHeight = 8;
+      const tableX = 20;
       
-      resultData.forEach((row, index) => {
-        pdf.setFont('helvetica', index === 0 ? 'bold' : 'normal');
+      // Draw table header with thick border
+      pdf.setLineWidth(0.5);
+      pdf.line(tableX, startY, tableX + cellWidth.reduce((a, b) => a + b, 0), startY); // Top border
+      
+      resultData.forEach((row, rowIndex) => {
+        const rowY = startY + rowIndex * cellHeight;
+        
+        // Set font style for header
+        pdf.setFont('Poppins', rowIndex === 0 ? 'bold' : 'normal');
+        
+        // Draw cell borders
+        let currentX = tableX;
         row.forEach((cell, colIndex) => {
-          pdf.rect(20 + colIndex * cellWidth, startY + index * cellHeight, cellWidth, cellHeight);
-          pdf.text(cell.toString(), 25 + colIndex * cellWidth, startY + index * cellHeight + 5);
+          // Draw vertical borders
+          pdf.line(currentX, rowY, currentX, rowY + cellHeight);
+          
+          // Draw text
+          pdf.text(
+            cell.toString(),
+            currentX + 3,
+            rowY + cellHeight - 2
+          );
+          
+          currentX += cellWidth[colIndex];
         });
+        
+        // Draw last vertical border
+        pdf.line(currentX, rowY, currentX, rowY + cellHeight);
+        
+        // Draw horizontal border
+        pdf.line(tableX, rowY + cellHeight, tableX + cellWidth.reduce((a, b) => a + b, 0), rowY + cellHeight);
       });
 
       y = startY + resultData.length * cellHeight + 20;
 
-      // Add diagrams
+      // Add diagrams with LaTeX-style captions
       const chartImages = await captureCharts();
       
       if (chartImages.length > 0) {
         pdf.addPage();
         
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(14);
+        pdf.setFont('Poppins', 'bold');
+        pdf.setFontSize(16);
         pdf.text('4. Force Diagrams', 20, 20);
 
         let currentY = 30;
         const pageWidth = pdf.internal.pageSize.getWidth();
-        const maxWidth = pageWidth - 40; // 20mm margin on each side
+        const maxWidth = pageWidth - 40;
         
         chartImages.forEach((imgData, index) => {
-          if (currentY > pdf.internal.pageSize.getHeight() - 40) {
+          if (currentY > pdf.internal.pageSize.getHeight() - 60) {
             pdf.addPage();
             currentY = 30;
           }
 
-          // Add chart title
-          pdf.setFont('helvetica', 'bold');
-          pdf.setFontSize(12);
-          pdf.text(
-            index === 0 ? '4.1 Shear Force Diagram' : '4.2 Bending Moment Diagram',
-            20,
-            currentY - 5
-          );
+          // Add figure number and caption
+          pdf.setFont('Poppins', 'bold');
+          pdf.setFontSize(11);
+          const caption = index === 0 
+            ? 'Figure 4.1: Shear Force Diagram' 
+            : 'Figure 4.2: Bending Moment Diagram';
+          pdf.text(caption, 20, currentY - 5);
 
           // Add chart image
           pdf.addImage(

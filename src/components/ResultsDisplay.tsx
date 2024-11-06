@@ -108,7 +108,7 @@ const ResultsDisplay = () => {
           </div>
           <div className="bg-gray-50 p-4 rounded-lg">
             <p className="text-gray-600">Max Bending Moment</p>
-            <p className="text-2xl font-bold text-gray-900">{results.maxBendingMoment.toFixed(2)} Nm</p>
+            <p className="text-2xl font-bold text-gray-900">{(results.maxBendingMoment * 1000).toFixed(2)} N·mm</p>
           </div>
         </div>
 
@@ -138,7 +138,7 @@ const ResultsDisplay = () => {
 
         <div className="bg-gray-50 p-4 rounded-lg">
           <p className="text-gray-600">Center of Gravity</p>
-          <p className="text-2xl font-bold text-gray-900">{results.centerOfGravity.toFixed(2)} m</p>
+          <p className="text-2xl font-bold text-gray-900">{results.centerOfGravity.toFixed(2)} mm</p>
         </div>
       </div>
     </div>
