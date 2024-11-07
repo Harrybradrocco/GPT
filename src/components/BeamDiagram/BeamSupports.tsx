@@ -15,33 +15,33 @@ export const BeamSupports: React.FC<BeamSupportsProps> = ({
   scale,
   paddingX
 }) => {
-  const supportStyle = "w-8 flex flex-col items-center";
+  const supportStyle = "absolute flex flex-col items-center";
+  const triangleSize = "w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-blue-500";
   
   const PinSupport = ({ position }: { position: number }) => (
     <div 
-      className={`absolute ${supportStyle}`}
+      className={supportStyle}
       style={{ 
         left: `calc(${paddingX}px + ${position * scale}%)`,
-        top: 'calc(50% + 1.5px)', // Align with the center of the beam
-        transform: 'translate(-50%, -50%)'
+        top: '50%',
+        transform: 'translate(-50%, -1px)' // -1px to ensure precise beam contact
       }}
     >
-      <div className="w-6 h-6 bg-blue-500 rotate-45" />
-      <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[16px] border-l-transparent border-r-transparent border-b-blue-500" />
+      <div className={triangleSize} />
     </div>
   );
 
   const FixedSupport = () => (
     <div 
-      className={`absolute ${supportStyle}`}
+      className={supportStyle}
       style={{ 
         left: `${paddingX}px`,
-        top: 'calc(50% + 1.5px)', // Align with the center of the beam
-        transform: 'translate(-50%, -50%)'
+        top: '50%',
+        transform: 'translate(-50%, -1px)' // -1px to ensure precise beam contact
       }}
     >
-      <div className="w-6 h-12 bg-blue-500" />
-      <div className="w-8 h-12 absolute left-0 flex flex-col justify-evenly">
+      <div className="w-0 h-0 border-l-[16px] border-r-[16px] border-b-[24px] border-l-transparent border-r-transparent border-b-blue-500" />
+      <div className="w-8 absolute left-0 flex flex-col justify-evenly mt-2">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="w-4 h-1 bg-blue-500" />
         ))}
