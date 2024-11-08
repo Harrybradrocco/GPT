@@ -5,9 +5,9 @@ import Header from './components/Header';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="space-y-12">
           <section className="bg-white rounded-xl p-8 shadow-lg">
             <div className="flex items-center gap-3 mb-6">
@@ -18,6 +18,11 @@ function App() {
           </section>
         </div>
       </main>
+      <footer className="bg-white border-t border-gray-200 py-4">
+        <div className="container mx-auto px-4 text-center text-gray-600">
+          © {new Date().getFullYear()} Hbradroc@uwo.ca
+        </div>
+      </footer>
     </div>
   );
 }

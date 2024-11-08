@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../store';
 import { materials } from '../data/materials';
 import { Material, CrossSectionType } from '../types';
+import CrossSectionDiagram from './CrossSectionDiagram';
 
 const MaterialSelector = () => {
   const { beam, updateBeam } = useStore();
@@ -52,6 +53,9 @@ const MaterialSelector = () => {
       case 'rectangular':
         return (
           <>
+            <div className="col-span-2">
+              <CrossSectionDiagram type={beam.crossSection.type} />
+            </div>
             <div>
               <label className="block text-sm text-gray-600 mb-1">Width (mm)</label>
               <input
@@ -97,26 +101,31 @@ const MaterialSelector = () => {
 
       case 'circular':
         return (
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Diameter (mm)</label>
-            <input
-              type="number"
-              value={beam.crossSection.dimensions.diameter || 0}
-              onChange={(e) => updateBeam({
-                ...beam,
-                crossSection: {
-                  ...beam.crossSection,
-                  dimensions: {
-                    ...beam.crossSection.dimensions,
-                    diameter: parseFloat(e.target.value) || 0
+          <>
+            <div className="col-span-2">
+              <CrossSectionDiagram type={beam.crossSection.type} />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm text-gray-600 mb-1">Diameter (mm)</label>
+              <input
+                type="number"
+                value={beam.crossSection.dimensions.diameter || 0}
+                onChange={(e) => updateBeam({
+                  ...beam,
+                  crossSection: {
+                    ...beam.crossSection,
+                    dimensions: {
+                      ...beam.crossSection.dimensions,
+                      diameter: parseFloat(e.target.value) || 0
+                    }
                   }
-                }
-              })}
-              className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              min="0"
-              step="1"
-            />
-          </div>
+                })}
+                className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                min="0"
+                step="1"
+              />
+            </div>
+          </>
         );
 
       case 'i-beam':
@@ -124,6 +133,9 @@ const MaterialSelector = () => {
       case 't-beam':
         return (
           <>
+            <div className="col-span-2">
+              <CrossSectionDiagram type={beam.crossSection.type} />
+            </div>
             <div>
               <label className="block text-sm text-gray-600 mb-1">Height (mm)</label>
               <input
