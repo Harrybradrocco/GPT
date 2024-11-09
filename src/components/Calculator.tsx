@@ -11,7 +11,7 @@ const Calculator = () => {
   const { loads, addLoad, removeLoad, updateLoad, beam } = useStore();
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 max-w-[1200px] mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-8">
           <BeamConfig />
@@ -40,20 +40,17 @@ const Calculator = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-8">
-        {/* Beam Visualization */}
-        <div className="bg-white rounded-xl p-8 shadow-lg">
+        <div className="bg-white rounded-xl p-6 shadow-lg overflow-hidden">
           <h3 className="text-xl font-semibold text-gray-900 mb-6">Beam Diagram</h3>
           <BeamDiagram />
         </div>
 
-        {/* Shear Force Diagram */}
-        <div className="bg-white rounded-xl p-8 shadow-lg">
+        <div className="bg-white rounded-xl p-6 shadow-lg overflow-hidden">
           <h3 className="text-xl font-semibold text-gray-900 mb-6">Shear Force Diagram</h3>
           <ShearForceChart />
         </div>
 
-        {/* Bending Moment Diagram */}
-        <div className="bg-white rounded-xl p-8 shadow-lg">
+        <div className="bg-white rounded-xl p-6 shadow-lg overflow-hidden">
           <h3 className="text-xl font-semibold text-gray-900 mb-6">Bending Moment Diagram</h3>
           <BendingMomentChart />
         </div>

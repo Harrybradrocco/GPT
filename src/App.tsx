@@ -7,9 +7,9 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
-      <main className="container mx-auto px-4 py-8 flex-grow">
-        <div className="space-y-12">
-          <section className="bg-white rounded-xl p-8 shadow-lg">
+      <main className="container mx-auto px-4 py-8 flex-grow overflow-x-hidden">
+        <div className="max-w-[1200px] mx-auto">
+          <section className="bg-white rounded-xl p-6 shadow-lg mb-8">
             <div className="flex items-center gap-3 mb-6">
               <Scale className="w-6 h-6 text-blue-600" />
               <h2 className="text-2xl font-bold text-gray-900">Load Calculator</h2>

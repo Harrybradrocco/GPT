@@ -14,45 +14,43 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
   const color = isShear ? '#dc2626' : '#2563eb';
   const unit = isShear ? 'N' : 'N·mm';
 
-  // Convert bending moment from Nm to N·mm if needed
   const chartData = isShear ? data : data.map(point => ({
     ...point,
-    bendingMoment: point.bendingMoment * 1000 // Convert Nm to N·mm
+    bendingMoment: point.bendingMoment * 1000
   }));
 
-  // Calculate domain for Y axis
   const values = chartData.map(d => isShear ? d.shearForce : d.bendingMoment).filter(Boolean) as number[];
   const maxAbs = Math.max(...values.map(Math.abs), 0.1);
   const yDomain = [-maxAbs, maxAbs];
 
   return (
-    <div style={{ height }}>
-      <ResponsiveContainer>
+    <div style={{ width: '100%', height: height }} className="max-w-full overflow-hidden">
+      <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={chartData}
           margin={{
             top: 20,
-            right: 30,
-            left: 80,
-            bottom: 60
+            right: 20,
+            left: 60,
+            bottom: 40
           }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis
             dataKey="distance"
-            height={50}
+            height={40}
             label={{
               value: 'Distance (mm)',
               position: 'bottom',
-              offset: 40,
+              offset: 20,
               style: {
                 fill: '#374151',
-                fontSize: '14px',
+                fontSize: '12px',
                 fontWeight: 500
               }
             }}
             tick={{
-              fontSize: 12,
+              fontSize: 10,
               fill: '#374151'
             }}
             tickFormatter={(value) => value.toFixed(0)}
@@ -60,21 +58,21 @@ export const ForceChart: React.FC<ForceChartProps> = ({ data, type, height = 200
           />
           <YAxis
             domain={yDomain}
-            width={70}
+            width={50}
             label={{
               value: isShear ? 'Shear Force (N)' : 'Bending Moment (N·mm)',
               angle: -90,
               position: 'insideLeft',
-              offset: -60,
+              offset: -40,
               style: {
                 fill: '#374151',
-                fontSize: '14px',
+                fontSize: '12px',
                 fontWeight: 500,
                 textAnchor: 'middle'
               }
             }}
             tick={{
-              fontSize: 12,
+              fontSize: 10,
               fill: '#374151'
             }}
             tickFormatter={(value) => value.toFixed(0)}

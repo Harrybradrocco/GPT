@@ -15,36 +15,68 @@ export const BeamSupports: React.FC<BeamSupportsProps> = ({
   scale,
   paddingX
 }) => {
-  const supportStyle = "absolute flex flex-col items-center";
-  const triangleSize = "w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-blue-500";
-  
   const PinSupport = ({ position }: { position: number }) => (
     <div 
-      className={supportStyle}
+      className="absolute bottom-16"
       style={{ 
         left: `calc(${paddingX}px + ${position * scale}%)`,
-        top: '50%',
-        transform: 'translate(-50%, -1px)' // -1px to ensure precise beam contact
+        transform: 'translateX(-50%)'
       }}
     >
-      <div className={triangleSize} />
+      {/* Triangle support */}
+      <div className="w-8 h-8 relative">
+        <div className="absolute inset-0">
+          <svg viewBox="0 0 32 32" className="w-full h-full">
+            <path
+              d="M0,0 L16,32 L32,0 Z"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-gray-900"
+            />
+          </svg>
+        </div>
+      </div>
     </div>
   );
 
   const FixedSupport = () => (
     <div 
-      className={supportStyle}
+      className="absolute bottom-16"
       style={{ 
         left: `${paddingX}px`,
-        top: '50%',
-        transform: 'translate(-50%, -1px)' // -1px to ensure precise beam contact
+        transform: 'translateX(-50%)'
       }}
     >
-      <div className="w-0 h-0 border-l-[16px] border-r-[16px] border-b-[24px] border-l-transparent border-r-transparent border-b-blue-500" />
-      <div className="w-8 absolute left-0 flex flex-col justify-evenly mt-2">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="w-4 h-1 bg-blue-500" />
-        ))}
+      {/* Fixed support rectangle with hatching */}
+      <div className="w-8 h-16 relative">
+        <svg viewBox="0 0 32 64" className="w-full h-full">
+          <pattern
+            id="hatch"
+            patternUnits="userSpaceOnUse"
+            width="4"
+            height="4"
+            patternTransform="rotate(45)"
+          >
+            <line
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="4"
+              stroke="currentColor"
+              strokeWidth="1"
+              className="text-gray-900"
+            />
+          </pattern>
+          <rect
+            width="32"
+            height="64"
+            fill="url(#hatch)"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-gray-900"
+          />
+        </svg>
       </div>
     </div>
   );
